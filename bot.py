@@ -1,6 +1,7 @@
 """Пример простого Телеграм Бота - ПК асистента"""
 from config import BotToken, AdminId, PyCharm_Path
-from Dops.keyboards import menu_kb, start_programs_kb, stats_kb
+from Dops.keyboards import menu_kb, start_programs_kb, stats_kb, volume_kb, different_kb
+from Dops.audio import get_media_info
 from aiogram import Bot, Dispatcher, types, executor
 from aiogram.types import CallbackQuery
 import pyautogui
@@ -8,6 +9,7 @@ import psutil
 import webbrowser
 import time
 import subprocess
+import os
 
 bot = Bot(BotToken)
 dp = Dispatcher(bot)
@@ -44,39 +46,111 @@ async def callback_handler(callback_query: CallbackQuery):
         pass
 
     elif callback_data == "volume_up":
-        for i in range(5):
-            pyautogui.press("volumeup")
+
         try:
+            track_info = await get_media_info()
+            caption_text = f"""
+<b>Сейчас играет:</b>
+{track_info or 'Ничего не играет'}
+
+<b>Последние действие:</b>
+  ▸ Громкость +
+"""
             await bot.edit_message_caption(
                 message_id=callback_query.message.message_id,
                 chat_id=chatid,
-                caption="Последние действие:\n  ▸ Громкость +10",
-                reply_markup=await menu_kb(),
+                caption=caption_text,
+                reply_markup=await volume_kb("up"),
+                parse_mode="HTML"
+            )
+
+        except ValueError:
+            pass
+
+    elif callback_data == "volume_2_up":
+        pyautogui.press("volumeup")
+
+    elif callback_data == "volume_4_up":
+        for i in range(2):
+            pyautogui.press("volumeup")
+
+    elif callback_data == "volume_6_up":
+        for i in range(3):
+            pyautogui.press("volumeup")
+
+    elif callback_data == "volume_8_up":
+        for i in range(4):
+            pyautogui.press("volumeup")
+
+    elif callback_data == "volume_10_up":
+        for i in range(5):
+            pyautogui.press("volumeup")
+
+    elif callback_data == "volume_12_up":
+        for i in range(6):
+            pyautogui.press("volumeup")
+
+    elif callback_data == "volume_down":
+        try:
+            track_info = await get_media_info()
+            caption_text = f"""
+<b>Сейчас играет:</b>
+{track_info or 'Ничего не играет'}
+
+<b>Последние действие:</b>
+  ▸ Громкость -
+            """
+            await bot.edit_message_caption(
+                message_id=callback_query.message.message_id,
+                chat_id=chatid,
+                caption=caption_text,
+                reply_markup=await volume_kb("down"),
+                parse_mode="HTML"
             )
         except ValueError:
             pass
 
-    elif callback_data == "volume_down":
+    elif callback_data == "volume_2_down":
+        pyautogui.press("volumedown")
+
+    elif callback_data == "volume_4_down":
+        for i in range(2):
+            pyautogui.press("volumedown")
+
+    elif callback_data == "volume_6_down":
+        for i in range(3):
+            pyautogui.press("volumedown")
+
+    elif callback_data == "volume_8_down":
+        for i in range(4):
+            pyautogui.press("volumedown")
+
+    elif callback_data == "volume_10_down":
         for i in range(5):
             pyautogui.press("volumedown")
-        try:
-            await bot.edit_message_caption(
-                message_id=callback_query.message.message_id,
-                chat_id=chatid,
-                caption="Последние действие:\n  ▸ Громкость -10",
-                reply_markup=await menu_kb(),
-            )
-        except ValueError:
-            pass
+
+    elif callback_data == "volume_12_down":
+        for i in range(6):
+            pyautogui.press("volumedown")
 
     elif callback_data == "pause":
         pyautogui.press("playpause")
         try:
+
+            track_info = await get_media_info()
+            caption_text = f"""
+<b>Сейчас играет:</b>
+{track_info or 'Ничего не играет'}
+
+<b>Последние действие:</b>
+  ▸ Пауза
+            """
             await bot.edit_message_caption(
                 message_id=callback_query.message.message_id,
                 chat_id=chatid,
-                caption="Последние действие:\n  ▸ Пауза",
+                caption=caption_text,
                 reply_markup=await menu_kb(),
+                parse_mode="HTML"
             )
         except ValueError:
             pass
@@ -84,11 +158,21 @@ async def callback_handler(callback_query: CallbackQuery):
     elif callback_data == "next":
         pyautogui.press("nexttrack")
         try:
+            time.sleep(1)
+            track_info = await get_media_info()
+            caption_text = f"""
+<b>Сейчас играет:</b>
+{track_info or 'Ничего не играет'}
+
+<b>Последние действие:</b>
+  ▸ Следующий трек
+                        """
             await bot.edit_message_caption(
                 message_id=callback_query.message.message_id,
                 chat_id=chatid,
-                caption="Последние действие:\n  ▸ Следующий трек",
+                caption=caption_text,
                 reply_markup=await menu_kb(),
+                parse_mode="HTML"
             )
         except ValueError:
             pass
@@ -97,22 +181,41 @@ async def callback_handler(callback_query: CallbackQuery):
         pyautogui.press("prevtrack")
         pyautogui.press("prevtrack")
         try:
+            time.sleep(1)
+            track_info = await get_media_info()
+            caption_text = f"""
+<b>Сейчас играет:</b>
+{track_info or 'Ничего не играет'}
+
+<b>Последние действие:</b>
+  ▸ Предыдущий трек
+                        """
             await bot.edit_message_caption(
                 message_id=callback_query.message.message_id,
                 chat_id=chatid,
-                caption="Последние действие:\n  ▸ Предыдущий трек",
+                caption=caption_text,
                 reply_markup=await menu_kb(),
+                parse_mode="HTML"
             )
         except ValueError:
             pass
 
     elif callback_data == "refresh_menu":
         try:
+            track_info = await get_media_info()
+            caption_text = f"""
+<b>Сейчас играет:</b>
+{track_info or 'Ничего не играет'}
+
+<b>Последние действие:</b>
+  ▸ Обновление меню
+                        """
             await bot.edit_message_caption(
                 message_id=callback_query.message.message_id,
                 chat_id=chatid,
-                caption="Последние действие:\n  ▸ Обновление меню",
+                caption=caption_text,
                 reply_markup=await menu_kb(),
+                parse_mode="HTML"
             )
         except ValueError:
             pass
@@ -130,11 +233,20 @@ async def callback_handler(callback_query: CallbackQuery):
 
     elif callback_data == "back":
         try:
+            track_info = await get_media_info()
+            caption_text = f"""
+<b>Сейчас играет:</b>
+{track_info or 'Ничего не играет'}
+
+<b>Последние действие:</b>
+  ▸ Назад
+"""
             await bot.edit_message_caption(
                 message_id=callback_query.message.message_id,
                 chat_id=chatid,
-                caption="Последние действие:\n  ▸ Назад",
+                caption=caption_text,
                 reply_markup=await menu_kb(),
+                parse_mode="HTML"
             )
         except ValueError:
             pass
@@ -239,7 +351,36 @@ async def callback_handler(callback_query: CallbackQuery):
         except ValueError:
             pass
 
-    if callback_data == "stats_refresh":
+
+    elif callback_data == "shutdown":
+        await bot.edit_message_caption(
+            message_id=callback_query.message.message_id,
+            chat_id=chatid,
+            caption=f"Последние действие:\n ▸ Выключение устройства",
+            reply_markup=await menu_kb(),
+            parse_mode="HTML",
+        )
+        os.system("shutdown /s /t 5")
+
+
+    elif callback_data == "different":
+        await bot.edit_message_caption(
+            message_id=callback_query.message.message_id,
+            chat_id=chatid,
+            caption=f"Последние действие:\n ▸ Разное",
+            reply_markup=await different_kb(),
+            parse_mode="HTML",
+        )
+
+    elif callback_data == "screenshot":
+        screenshot = pyautogui.screenshot()
+        screenshot_path = "screenshot.png"
+        screenshot.save(screenshot_path)
+
+        with open(screenshot_path, "rb") as photo:
+            await bot.send_photo(chat_id=chatid, photo=photo, caption="📸 Скриншот экрана")
+
+    elif callback_data == "stats_refresh":
         Free_Space = psutil.disk_usage("C:\\").free / (1024 * 1024 * 1024)  # в GB
         UpTime = time.time() - psutil.boot_time()
         uptime = time.gmtime(UpTime)
